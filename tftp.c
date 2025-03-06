@@ -40,7 +40,7 @@ int main(void)
 		close(sockfd);
 		exit(EXIT_FAILURE);
 	}
-	printf("UDP Echo server listening on port %d...\n", PORT);
+	printf("TFTP server listening on port %d...\n", PORT);
 	state = AWAITING_RQ;
 	while (1)
 	{
