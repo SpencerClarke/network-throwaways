@@ -164,6 +164,9 @@ int main(void)
 			if(sent < 0) 
 			{
 				perror("Send failed");
+				fclose(fp);
+				state = AWAITING_RQ;
+				continue;
 			} 
 			else 
 			{
@@ -202,6 +205,9 @@ int main(void)
 			if(sent < 0) 
 			{
 				perror("Send failed");
+				fclose(fp);
+				state = AWAITING_RQ;
+				continue;
 			} 
 			else 
 			{
