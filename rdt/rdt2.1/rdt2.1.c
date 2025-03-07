@@ -126,13 +126,15 @@ int rdt_send(struct RDT_Connection *connection, size_t message_size, const char 
 	packet.seq_number = connection->current_seq_number;
 	connection->current_seq_number = !(connection->current_seq_number);
 	
-	packet.checksum = 0;
+	packet.checksum = packet.seq_number;
 	for(i = 0; i < message_size; i++)
 	{
 		packet.checksum ^= (message_buffer[i] << 8 * (i % 2));
 	}
+
 	for(;;)
 	{
+		printf("rdt_send: sending packet with sequence number %d\n", (int)(packet.seq_number));
 		while(sendto(connection->sock_fd, &packet, message_size + 3, 0, (struct sockaddr *)&(connection->peer_addr), sizeof(connection->peer_addr)) < 0);
 
 		packet_size = recvfrom(connection->sock_fd, &response, sizeof(response), 0, (struct sockaddr *)&(connection->peer_addr), &sockaddr_len);
@@ -168,7 +170,7 @@ size_t rdt_recv(struct RDT_Connection *connection, char *message_buffer)
 		}
 
 		/* Compute and verify checksum */
-		checksum = 0;
+		checksum = packet.seq_number;
 		for(i = 0; i < packet_size - 3; i++)
 		{
 			checksum ^= (packet.buffer[i] << 8 * (i % 2));
@@ -194,7 +196,7 @@ size_t rdt_recv(struct RDT_Connection *connection, char *message_buffer)
 			continue;
 		}
 
-		printf("rdt_recv: checksum and sequence number %d verified, sending ack and flipping sequence seq_number\n", connection->current_seq_number);
+		printf("rdt_recv: checksum and sequence number %d verified, sending ack and flipping sequence seq_number\n", (int)(connection->current_seq_number));
 		connection->current_seq_number = !(connection->current_seq_number);
 		response.value = htons(1);
 		response.checksum = response.value;
